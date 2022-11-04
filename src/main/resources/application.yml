@@ -1,0 +1,26 @@
+server:
+  port: 9100
+
+spring:
+  application:
+    name: Wish Backstage
+    version: 0.0.1v
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    name: defaultDataSource
+    url: jdbc:mysql://127.0.0.1:3306/wish?serverTimezone=UTC
+    username: root
+    password: mysql@zxsmart
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false
+  mapper-locations: classpath:mapper/*.xml
+  global-config:
+    db-config:
+      logic-delete-field: isDelete
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+database-management:
+  match-mode: create

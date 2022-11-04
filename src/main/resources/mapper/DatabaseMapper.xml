@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.autumn.wishbackstage.mapper.DatabaseMapper">
+
+    <select id="getTableList" resultType="java.lang.String">
+        SELECT table_name FROM information_schema.tables
+        WHERE table_schema = #{databaseName}
+    </select>
+
+    <select id="getTableStruct" resultType="java.util.Map">
+        SELECT COLUMN_NAME, IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, COLUMN_COMMENT
+        FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = #{databaseName} AND TABLE_NAME = #{tableName}
+    </select>
+
+    <update id="createTable" parameterType="java.util.List">
+        CREATE TABLE ${tableName} (
+            <foreach collection="fields" separator="," item="item">
+                `${item.field}` ${item.fieldType} ${item.attribute} COMMENT '${item.comment}'
+            </foreach>
+        ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
+    </update>
+
+</mapper>
