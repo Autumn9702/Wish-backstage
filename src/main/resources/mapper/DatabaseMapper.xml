@@ -7,7 +7,7 @@
         WHERE table_schema = #{databaseName}
     </select>
 
-    <select id="getTableStruct" resultType="java.util.Map">
+    <select id="getTableStruct" resultMap="tableStruct">
         SELECT COLUMN_NAME, IS_NULLABLE, DATA_TYPE, CHARACTER_MAXIMUM_LENGTH, COLUMN_COMMENT
         FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = #{databaseName} AND TABLE_NAME = #{tableName}
     </select>
@@ -17,7 +17,17 @@
             <foreach collection="fields" separator="," item="item">
                 `${item.field}` ${item.fieldType} ${item.attribute} COMMENT '${item.comment}'
             </foreach>
+            ,PRIMARY KEY (`id`) USING BTREE
         ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
     </update>
+
+
+    <resultMap id="tableStruct" type="cn.autumn.wishbackstage.model.db.TableStruct">
+        <result column="COLUMN_NAME" jdbcType="VARCHAR" property="COLUMN_NAME"/>
+        <result column="IS_NULLABLE" jdbcType="VARCHAR" property="IS_NULLABLE"/>
+        <result column="DATA_TYPE" jdbcType="VARCHAR" property="DATA_TYPE"/>
+        <result column="CHARACTER_MAXIMUM_LENGTH" jdbcType="VARCHAR" property="CHARACTER_MAXIMUM_LENGTH"/>
+        <result column="COLUMN_COMMENT" jdbcType="VARCHAR" property="COLUMN_COMMENT"/>
+    </resultMap>
 
 </mapper>

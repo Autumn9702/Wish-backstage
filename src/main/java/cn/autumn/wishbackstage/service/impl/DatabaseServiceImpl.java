@@ -23,7 +23,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
 
     @Override
     public List<String> getTableList() {
-        return databaseMapper.getTableList(generateTableConfig.getDatabaseUrl());
+        return databaseMapper.getTableList(generateTableConfig.getDatabaseByUrl());
     }
 
 }

@@ -31,6 +31,7 @@ public final class Utils {
     /**
      * Retrieves a string from an input stream.
      */
+    @SuppressWarnings("unchecked")
     public static String readFromInputStream(@Nullable InputStream stream) {
         if (stream == null) return "empty";
 
@@ -78,9 +79,9 @@ public final class Utils {
     public static String ofFieldType(Field f) {
         String r;
         switch (f.getType().toString()) {
-            case "class java.lang.Integer" -> r = "int";
-            case "class java.lang.Long" -> r = "bigint";
-            case "class java.lang.String" -> r = "varchar";
+            case "class java.lang.Integer" -> r = "int(11)";
+            case "class java.lang.Long" -> r = "bigint(11)";
+            case "class java.lang.String" -> r = "varchar(255)";
             case "class java.lang.Float" -> r = "float";
             case "class java.lang.Double" -> r = "double";
             case "class java.lang.Boolean" -> r = "tinyint";
@@ -111,9 +112,4 @@ public final class Utils {
         throw new DatabaseException("Field type error: " + s);
     }
 
-    public static void main(String[] args) {
-        String s = verifyField("varchar(255)");
-
-        System.out.println(s);
-    }
 }

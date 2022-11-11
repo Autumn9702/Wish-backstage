@@ -1,10 +1,11 @@
 package cn.autumn.wishbackstage.mapper;
 
+import cn.autumn.wishbackstage.model.db.Fields;
+import cn.autumn.wishbackstage.model.db.TableStruct;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author cf
@@ -26,13 +27,13 @@ public interface DatabaseMapper {
      * @return The table struct.
      */
     @MapKey("COLUMN_NAME")
-    List<Map<String, String>> getTableStruct(@Param("databaseName") String databaseName, @Param("tableName") String tableName);
+    List<TableStruct> getTableStruct(@Param("databaseName") String databaseName, @Param("tableName") String tableName);
 
     /**
      * Create table
      * @param tableName The table name.
      * @param fields The field information.
      */
-    void createTable(@Param("tableName") String tableName, @Param("fields") List<Object> fields);
+    void createTable(@Param("tableName") String tableName, @Param("fields") List<Fields> fields);
 
 }

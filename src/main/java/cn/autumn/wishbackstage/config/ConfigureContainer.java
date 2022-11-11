@@ -18,6 +18,11 @@ public sealed class ConfigureContainer permits Configuration {
     public static final String RELATIVE_PATH = "./src/main/java/";
 
     public static final String FIELD_NAME_ID = "id";
+    public static final String ID_ATTRIBUTE = "NOT NULL AUTO_INCREMENT";
+
+    public static final String PARAM_NULL = "NULL";
+    public static final String PARAM_NOT_NULL = "NOT NULL";
+    public static final String PARAM_EMPTY = "";
 
     public static final String TRANSIENT = "transient";
 
