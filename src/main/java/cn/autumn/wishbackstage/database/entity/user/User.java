@@ -16,7 +16,7 @@ public class User {
 
     @Getter @Setter @Id
     private Integer id;
-    @Setter private transient Account account;
+//    @Setter private transient Account account;
 
     @FieldAttribute(name = "nick_name", fieldType = "varchar(30)", isNull = false, comment = "昵称")
     @Getter @Setter private String nickName;

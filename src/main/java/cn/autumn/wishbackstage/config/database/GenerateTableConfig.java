@@ -5,6 +5,8 @@ import cn.autumn.wishbackstage.mapper.DatabaseMapper;
 import cn.autumn.wishbackstage.model.db.Fields;
 import cn.autumn.wishbackstage.model.db.TableField;
 import cn.autumn.wishbackstage.model.db.TableStruct;
+import cn.autumn.wishbackstage.model.db.UTC;
+import cn.autumn.wishbackstage.model.db.UpTyCl;
 import cn.autumn.wishbackstage.util.BeanUtil;
 import cn.autumn.wishbackstage.util.Utils;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -13,13 +15,14 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.lang.annotation.Retention;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static cn.autumn.wishbackstage.config.ConfigureContainer.*;
+import static cn.autumn.wishbackstage.config.Configuration.*;
 
 /**
  * @author cf
@@ -122,7 +125,7 @@ public class GenerateTableConfig {
             String tableName = e.getAnnotation(TableName.class).value();
             Field[] fields = e.getDeclaredFields();
             for (Field field : fields) {
-                String fn = field.getName();
+                String fn = Utils.upperCharToUnderLine(field.getName());
                 if (fn.equals(FIELD_NAME_ID)) {
                     fds.add(new Fields(fn, Utils.ofFieldType(field), "NOT NULL AUTO_INCREMENT", "id"));
                     continue;
@@ -146,46 +149,130 @@ public class GenerateTableConfig {
 
     private List<TableField> updateTableInfo(Set<Class<?>> es) {
         for (Class<?> e : es) {
+            String tableName = e.getAnnotation(FieldAttribute.class).name();
             List<TableStruct> entityStruct = classToTableStruct(e);
             List<TableStruct> tableStruct = databaseMapper.getTableStruct(getDatabaseByUrl(), e.getAnnotation(TableName.class).value());
+            determinesFieldUpdated(tableName, entityStruct, tableStruct);
 
 
         }
         return null;
     }
 
+    private boolean determinesFieldUpdated(String tableName, List<TableStruct> ent, List<TableStruct> dbt) {
+
+        if (ent.size() != dbt.size()) return false;
+
+        boolean needUpdate = true;
+
+        for (TableStruct ef : ent) {
+            boolean sameField = false;
+            for (TableStruct tf : dbt) {
+                if (ef.getCOLUMN_NAME().equals(tf.getCOLUMN_NAME())) {
+
+                    if (!matchEfToDf(tableName, ef, tf)) {
+
+                    }
+                }
+            }
+            if (!sameField) return false;
+        }
+
+        return false;
+    }
+
+    private UpTyCl matchEfToDf(String tableName, TableStruct ef, TableStruct df) {
+        UpTyCl u = null;
+        if (!ef.getDATA_TYPE().equals(df.getDATA_TYPE()) || !ef.getCHARACTER_MAXIMUM_LENGTH().equals(df.getCHARACTER_MAXIMUM_LENGTH())) {
+            if (ef.getCHARACTER_MAXIMUM_LENGTH() != null && !ef.getCHARACTER_MAXIMUM_LENGTH().isEmpty()) {
+                ef.setDATA_TYPE(ef.getDATA_TYPE() + "(" + ef.getCHARACTER_MAXIMUM_LENGTH() + ")");
+            }
+            u = new UpTyCl(FIELD_TYPE, tableName, ef.getDATA_TYPE());
+        }
+
+        if (!ef.getIS_NULLABLE().equals(df.getIS_NULLABLE())) {
+            String isNull = ef.getIS_NULLABLE().equals(DB_FIELD_IS_NULL) ? PARAM_NULL : PARAM_NOT_NULL;
+            if (u == null) {
+                u = new UpTyCl(FIELD_TYPE, tableName, ef.getDATA_TYPE(),  isNull);
+            }else {
+                u.setIsNull(isNull);
+            }
+        }
+
+        if (!ef.getCOLUMN_COMMENT().equals(df.getCOLUMN_COMMENT())) {
+            String isNull = ef.getIS_NULLABLE().equals(DB_FIELD_IS_NULL) ? PARAM_NULL : PARAM_NOT_NULL;
+            if (u == null) {
+                u = new UpTyCl(FIELD_TYPE, tableName, ef.getDATA_TYPE(),  isNull, ef.getCOLUMN_COMMENT());
+            }else {
+                u.setComment(ef.getCOLUMN_COMMENT());
+            }
+        }
+
+        return u;
+    }
+
+    private UTC processUpdateSql(String tableName, String fieldName, String param, String type) {
+
+    }
+
+    /**
+     * Convert an entity class to a TableStruct.
+     * @param e The entity class.
+     * @return The TableStruct.
+     */
     private List<TableStruct> classToTableStruct(Class<?> e) {
         List<TableStruct> structs = new ArrayList<>();
         Field[] fields = e.getDeclaredFields();
         for (Field field : fields) {
-            if (field.getName().equals(FIELD_NAME_ID)) {
+            String fieldName = Utils.upperCharToUnderLine(field.getName());
+            if (fieldName.equals(FIELD_NAME_ID)) {
                 String fieldType = Utils.ofFieldType(field);
-                structs.add(new TableStruct(field.getName(), PARAM_NOT_NULL, ofFieldType(fieldType), ofFieldLen(fieldType), FIELD_NAME_ID));
+                structs.add(new TableStruct(fieldName, DB_FIELD_NOT_NULL, ofFieldType(fieldType), null, FIELD_NAME_ID));
                 continue;
             }
             FieldAttribute fa = field.getAnnotation(FieldAttribute.class);
             if (fa != null) {
-                structs.add(new TableStruct(field.getName(), fa.isNull() ? PARAM_NULL : PARAM_NOT_NULL, ofFieldType(fa.fieldType()), ofFieldLen(fa.fieldType()), fa.comment().isEmpty() ? field.getName() : fa.comment()));
+                structs.add(new TableStruct(fieldName, fa.isNull() ? DB_FIELD_IS_NULL : DB_FIELD_NOT_NULL, ofFieldType(fa.fieldType()), ofFieldLen(fa.fieldType()), fa.comment().isEmpty() ? PARAM_EMPTY : fa.comment()));
                 continue;
             }
             String fieldType = Utils.ofFieldType(field);
-            structs.add(new TableStruct(field.getName(), PARAM_NULL, ofFieldType(fieldType), ofFieldLen(fieldType), PARAM_EMPTY));
+            structs.add(new TableStruct(fieldName, DB_FIELD_IS_NULL, ofFieldType(fieldType), ofFieldLen(fieldType), fieldName));
         }
         return structs;
     }
 
+    /**
+     * The type of the intercepted field.
+     * @param field The field information.
+     * @return The field type.
+     */
     private String ofFieldType(String field) {
+
+        if (!field.contains("(")) {
+            return field;
+        }
+
         return field.substring(0, field.lastIndexOf("("));
     }
 
+    /**
+     * The field length of the intercepted field.
+     * @param field The field information.
+     * @return The field length.
+     */
     private String ofFieldLen(String field) {
+
+        if (!field.contains("(")) {
+            return "";
+        }
+
         return field.substring(field.lastIndexOf("(") + 1, field.lastIndexOf(")"));
     }
 
     public static void main(String[] args) {
-        TableStruct t1 = new TableStruct("1", "1", "1", "1", "1");
-        TableStruct t2 = new TableStruct("1", "1", "1", "1", "1");
-        System.out.println("t1 = t2: " + t1.c);
+        String s = "chengziqiu";
+        String s1 = Utils.upperCharToUnderLine(s);
+        System.out.println(s1);
     }
 
 }

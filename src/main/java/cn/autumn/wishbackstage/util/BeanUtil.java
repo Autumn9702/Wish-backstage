@@ -7,7 +7,7 @@ import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 
-import static cn.autumn.wishbackstage.config.ConfigureContainer.RELATIVE_PATH;
+import static cn.autumn.wishbackstage.config.Configuration.RELATIVE_PATH;
 
 /**
  * @author cf

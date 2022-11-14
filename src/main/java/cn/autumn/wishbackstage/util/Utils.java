@@ -8,8 +8,10 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import static cn.autumn.wishbackstage.config.ConfigureContainer.*;
+import static cn.autumn.wishbackstage.config.Configuration.*;
 
 /**
  * @author cf
@@ -78,13 +80,15 @@ public final class Utils {
     @SuppressWarnings("all")
     public static String ofFieldType(Field f) {
         String r;
-        switch (f.getType().toString()) {
-            case "class java.lang.Integer" -> r = "int(11)";
+        String s = f.getType().toString();
+        switch (s) {
+            case "class java.lang.Integer", "int" -> r = "int(11)";
             case "class java.lang.Long" -> r = "bigint(11)";
             case "class java.lang.String" -> r = "varchar(255)";
             case "class java.lang.Float" -> r = "float";
             case "class java.lang.Double" -> r = "double";
-            case "class java.lang.Boolean" -> r = "tinyint";
+            case "class java.lang.Boolean", "boolean" -> r = "tinyint";
+            case "interface java.util.List" -> r = "json";
             default -> throw new DatabaseException("The field type is not supported");
         }
         return r;
@@ -110,6 +114,30 @@ public final class Utils {
             }
         }
         throw new DatabaseException("Field type error: " + s);
+    }
+
+    /**
+     * Uppercase to underscore letter.
+     * @param param The code field.
+     * @return The sql field.
+     */
+    public static String upperCharToUnderLine(String param) {
+        Pattern p = Pattern.compile(CAPITAL_LETTERS);
+        if (param == null || param.equals(PARAM_EMPTY)) {
+            throw new NullPointerException("Field name is null. Unable to convert.");
+        }
+        StringBuilder b = new StringBuilder(param);
+        Matcher m = p.matcher(param);
+        int i = 0;
+        while (m.find()) {
+            b.replace(m.start() + i, m.end() + i, "_" + m.group().toLowerCase());
+            i++;
+        }
+
+        if (UNDERLINE == b.charAt(0)) {
+            b.deleteCharAt(0);
+        }
+        return b.toString();
     }
 
 }
