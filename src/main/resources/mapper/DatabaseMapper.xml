@@ -21,7 +21,6 @@
         ) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
     </update>
 
-
     <resultMap id="tableStruct" type="cn.autumn.wishbackstage.model.db.TableStruct">
         <result column="COLUMN_NAME" jdbcType="VARCHAR" property="COLUMN_NAME"/>
         <result column="IS_NULLABLE" jdbcType="VARCHAR" property="IS_NULLABLE"/>

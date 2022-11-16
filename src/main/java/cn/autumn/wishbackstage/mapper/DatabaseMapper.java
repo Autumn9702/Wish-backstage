@@ -2,6 +2,7 @@ package cn.autumn.wishbackstage.mapper;
 
 import cn.autumn.wishbackstage.model.db.Fields;
 import cn.autumn.wishbackstage.model.db.TableStruct;
+import cn.autumn.wishbackstage.model.db.UpTyCl;
 import org.apache.ibatis.annotations.MapKey;
 import org.apache.ibatis.annotations.Param;
 
@@ -36,4 +37,24 @@ public interface DatabaseMapper {
      */
     void createTable(@Param("tableName") String tableName, @Param("fields") List<Fields> fields);
 
+    /**
+     * Update field type.
+     * @param tableName The table name.
+     * @param field The field information.
+     */
+    void updateFieldType(@Param("tableName") String tableName, @Param("field") UpTyCl field);
+
+    /**
+     * Update field is null.
+     * @param tableName The table name.
+     * @param field The field information.
+     */
+    void updateFieldIsNull(@Param("tableName") String tableName, @Param("field") UpTyCl field);
+
+    /**
+     * Update field comment.
+     * @param tableName The table name.
+     * @param field The field information.
+     */
+    void updateFieldComment(@Param("tableName") String tableName, @Param("field") UpTyCl field);
 }

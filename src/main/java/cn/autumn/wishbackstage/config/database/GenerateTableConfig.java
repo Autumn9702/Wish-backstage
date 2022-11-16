@@ -2,11 +2,7 @@ package cn.autumn.wishbackstage.config.database;
 
 import cn.autumn.wishbackstage.ex.DatabaseException;
 import cn.autumn.wishbackstage.mapper.DatabaseMapper;
-import cn.autumn.wishbackstage.model.db.Fields;
-import cn.autumn.wishbackstage.model.db.TableField;
-import cn.autumn.wishbackstage.model.db.TableStruct;
-import cn.autumn.wishbackstage.model.db.UTC;
-import cn.autumn.wishbackstage.model.db.UpTyCl;
+import cn.autumn.wishbackstage.model.db.*;
 import cn.autumn.wishbackstage.util.BeanUtil;
 import cn.autumn.wishbackstage.util.Utils;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -15,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.lang.annotation.Retention;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -149,51 +144,149 @@ public class GenerateTableConfig {
 
     private List<TableField> updateTableInfo(Set<Class<?>> es) {
         for (Class<?> e : es) {
-            String tableName = e.getAnnotation(FieldAttribute.class).name();
+            String tableName = e.getAnnotation(TableName.class).value();
             List<TableStruct> entityStruct = classToTableStruct(e);
             List<TableStruct> tableStruct = databaseMapper.getTableStruct(getDatabaseByUrl(), e.getAnnotation(TableName.class).value());
-            determinesFieldUpdated(tableName, entityStruct, tableStruct);
-
-
+            UAD uad = determinesFieldUpdated(tableName, entityStruct, tableStruct);
+            if (uad != null) {
+                processUpdateDB(uad);
+            }
         }
         return null;
     }
 
-    private boolean determinesFieldUpdated(String tableName, List<TableStruct> ent, List<TableStruct> dbt) {
+    /**
+     * Process table field change.
+     * @param uad Update create delete.
+     */
+    private void processUpdateDB(UAD uad) {
 
-        if (ent.size() != dbt.size()) return false;
+        if (uad.getUpdate() != null) {
+            List<UpTyCl> updateFields = uad.getUpdate();
 
-        boolean needUpdate = true;
+            for (UpTyCl utc : updateFields) {
+                switch (utc.getType()) {
+                    case FIELD_TYPE -> System.out.println("TYPE");
+                    case FIELD_NULL -> System.out.println("NULL");
+                    case FIELD_COMMENT -> System.out.println("COMMENT");
+                    default -> throw new DatabaseException("Parsing exception: " + utc.getType());
+                }
+            }
+        }
+
+        if (uad.getCreate() != null) {
+            List<UpTyCl> createFields = uad.getCreate();
+
+            for (UpTyCl c : createFields) {
+                System.out.println("create");
+            }
+        }
+
+        if (uad.getDelete() != null) {
+            List<UpTyCl> deleteFields = uad.getDelete();
+
+            for (UpTyCl d : deleteFields) {
+                System.out.println("delete");
+            }
+        }
+
+    }
+
+    /**
+     * Update field or add field or delete field.
+     */
+    private UAD determinesFieldUpdated(String tableName, List<TableStruct> ent, List<TableStruct> dbt) {
+
+        if (ent.size() != dbt.size()) return null;
+
+        List<UpTyCl> updateField = new ArrayList<>();
+        List<UpTyCl> addField = null;
+        List<UpTyCl> delField = null;
 
         for (TableStruct ef : ent) {
             boolean sameField = false;
             for (TableStruct tf : dbt) {
                 if (ef.getCOLUMN_NAME().equals(tf.getCOLUMN_NAME())) {
-
-                    if (!matchEfToDf(tableName, ef, tf)) {
-
+                    UpTyCl u = matchEfToDf(tableName, ef, tf);
+                    if (u != null) {
+                        updateField.add(u);
                     }
+                    sameField = true;
                 }
             }
-            if (!sameField) return false;
+            if (!sameField) {
+                if (addField == null) {
+                    addField = new ArrayList<>();
+                }
+                String isNull = ef.getIS_NULLABLE().equals(DB_FIELD_IS_NULL) ? PARAM_NULL : PARAM_NOT_NULL;
+                addField.add(new UpTyCl(FIELD_CREATE, tableName, ef.getCOLUMN_NAME(),ef.getDATA_TYPE(), isNull, ef.getCOLUMN_COMMENT()));
+            };
         }
 
-        return false;
+        if (addField != null) {
+            List<TableStruct> del = new ArrayList<>();
+            for (TableStruct d : dbt) {
+                boolean sf = false;
+                for (TableStruct e : ent) {
+                    if (e.getCOLUMN_NAME().equals(d.getCOLUMN_NAME())) {
+                        sf = true;
+                        break;
+                    }
+                }
+                if (sf) continue;
+                del.add(d);
+            }
+
+            if (!del.isEmpty()) {
+                delField = new ArrayList<>();
+                for (TableStruct t : del) {
+                    String isNull = t.getIS_NULLABLE().equals(DB_FIELD_IS_NULL) ? PARAM_NULL : PARAM_NOT_NULL;
+                    delField.add(new UpTyCl(t.getCOLUMN_NAME(), tableName, t.getCOLUMN_NAME(), t.getDATA_TYPE(), isNull, t.getCOLUMN_COMMENT()));
+                }
+            }
+        }
+
+        UAD uad = new UAD();
+        boolean process = false;
+
+        if (!updateField.isEmpty()) {
+            process = true;
+            uad.setUpdate(updateField);
+        }
+
+        if (addField != null && !addField.isEmpty()) {
+            process = true;
+            uad.setCreate(addField);
+        }
+
+        if (delField != null) {
+            process = true;
+            uad.setDelete(delField);
+        }
+
+        if (process) return uad;
+
+        return null;
     }
 
+    /**
+     * Verify field changes.
+     */
     private UpTyCl matchEfToDf(String tableName, TableStruct ef, TableStruct df) {
         UpTyCl u = null;
+        String fieldType = ef.getCHARACTER_MAXIMUM_LENGTH() == null ?
+                Utils.ofDefaultFieldLen(ef.getDATA_TYPE()) : ef.getDATA_TYPE() + "(" + ef.getCHARACTER_MAXIMUM_LENGTH() + ")";
         if (!ef.getDATA_TYPE().equals(df.getDATA_TYPE()) || !ef.getCHARACTER_MAXIMUM_LENGTH().equals(df.getCHARACTER_MAXIMUM_LENGTH())) {
             if (ef.getCHARACTER_MAXIMUM_LENGTH() != null && !ef.getCHARACTER_MAXIMUM_LENGTH().isEmpty()) {
                 ef.setDATA_TYPE(ef.getDATA_TYPE() + "(" + ef.getCHARACTER_MAXIMUM_LENGTH() + ")");
             }
-            u = new UpTyCl(FIELD_TYPE, tableName, ef.getDATA_TYPE());
+            u = new UpTyCl(FIELD_TYPE, tableName, ef.getCOLUMN_NAME(), fieldType);
         }
 
         if (!ef.getIS_NULLABLE().equals(df.getIS_NULLABLE())) {
             String isNull = ef.getIS_NULLABLE().equals(DB_FIELD_IS_NULL) ? PARAM_NULL : PARAM_NOT_NULL;
             if (u == null) {
-                u = new UpTyCl(FIELD_TYPE, tableName, ef.getDATA_TYPE(),  isNull);
+                u = new UpTyCl(FIELD_NULL, tableName, ef.getCOLUMN_NAME(), fieldType,  isNull);
             }else {
                 u.setIsNull(isNull);
             }
@@ -202,7 +295,7 @@ public class GenerateTableConfig {
         if (!ef.getCOLUMN_COMMENT().equals(df.getCOLUMN_COMMENT())) {
             String isNull = ef.getIS_NULLABLE().equals(DB_FIELD_IS_NULL) ? PARAM_NULL : PARAM_NOT_NULL;
             if (u == null) {
-                u = new UpTyCl(FIELD_TYPE, tableName, ef.getDATA_TYPE(),  isNull, ef.getCOLUMN_COMMENT());
+                u = new UpTyCl(FIELD_COMMENT, tableName, ef.getCOLUMN_NAME(), fieldType, isNull, ef.getCOLUMN_COMMENT());
             }else {
                 u.setComment(ef.getCOLUMN_COMMENT());
             }
@@ -211,9 +304,6 @@ public class GenerateTableConfig {
         return u;
     }
 
-    private UTC processUpdateSql(String tableName, String fieldName, String param, String type) {
-
-    }
 
     /**
      * Convert an entity class to a TableStruct.
@@ -269,10 +359,6 @@ public class GenerateTableConfig {
         return field.substring(field.lastIndexOf("(") + 1, field.lastIndexOf(")"));
     }
 
-    public static void main(String[] args) {
-        String s = "chengziqiu";
-        String s1 = Utils.upperCharToUnderLine(s);
-        System.out.println(s1);
-    }
+
 
 }

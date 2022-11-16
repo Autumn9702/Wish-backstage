@@ -37,6 +37,8 @@ public final class Configuration extends ConfigureContainer {
      */
     public static final String FIELD_TYPE = "FIELD-TYPE";
     public static final String FIELD_NULL = "FIELD-NULL";
+    public static final String FIELD_CREATE = "FIELD-CREATE";
+    public static final String FIELD_DELETE = "FIELD-DELETE";
     public static final String FIELD_COMMENT = "FIELD-COMMENT";
 
     /**

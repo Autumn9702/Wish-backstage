@@ -83,7 +83,7 @@ public final class Utils {
         String s = f.getType().toString();
         switch (s) {
             case "class java.lang.Integer", "int" -> r = "int(11)";
-            case "class java.lang.Long" -> r = "bigint(11)";
+            case "class java.lang.Long" -> r = "bigint(20)";
             case "class java.lang.String" -> r = "varchar(255)";
             case "class java.lang.Float" -> r = "float";
             case "class java.lang.Double" -> r = "double";
@@ -92,6 +92,24 @@ public final class Utils {
             default -> throw new DatabaseException("The field type is not supported");
         }
         return r;
+    }
+
+    /**
+     * Get field type default length.
+     * @param fieldType The field type
+     * @return The field and length
+     */
+    public static String ofDefaultFieldLen(String fieldType) {
+        return switch (fieldType) {
+            case "int" -> "int(11)";
+            case "bigint" -> "bigint(20)";
+            case "varchar" -> "varchar(255)";
+            case "float" -> "float";
+            case "double" -> "double";
+            case "tinyint" -> "tinyint";
+            case "json" -> "json";
+            default -> throw new DatabaseException("The field type is not supported");
+        };
     }
 
     /**
