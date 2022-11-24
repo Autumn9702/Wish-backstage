@@ -10,11 +10,11 @@ import lombok.Setter;
 public final class UpTyCl {
 
     @Getter @Setter String type;
-    @Setter String tableName;
-    @Setter String fieldName;
-    @Setter String fieldType;
-    @Setter String isNull;
-    @Setter String comment;
+    @Getter @Setter String tableName;
+    @Getter @Setter String fieldName;
+    @Getter @Setter String fieldType;
+    @Getter @Setter String isNull;
+    @Getter @Setter String comment;
 
     public UpTyCl() {}
 

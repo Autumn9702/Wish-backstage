@@ -7,7 +7,6 @@ import cn.autumn.wishbackstage.util.BeanUtil;
 import cn.autumn.wishbackstage.util.Utils;
 import com.baomidou.mybatisplus.annotation.TableName;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -23,7 +22,7 @@ import static cn.autumn.wishbackstage.config.Configuration.*;
  * @author cf
  * Created in 2022/11/2
  */
-@Configuration
+//@Configuration
 public class GenerateTableConfig {
 
     @Value("${spring.datasource.url}")
@@ -34,6 +33,7 @@ public class GenerateTableConfig {
 
     @Resource
     private DatabaseMapper databaseMapper;
+
 
     public String getDatabaseByUrl() {
         return databaseUrl.substring(databaseUrl.lastIndexOf("3306/") + 5, databaseUrl.lastIndexOf("?"));
