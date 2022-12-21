@@ -1,12 +1,17 @@
 package cn.autumn.wishbackstage.service.impl;
 
-import cn.autumn.wishbackstage.config.database.GenerateTableConfig;
-import cn.autumn.wishbackstage.mapper.DatabaseMapper;
+import cn.autumn.wishbackstage.model.db.UpTyCl;
 import cn.autumn.wishbackstage.service.DatabaseService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
-import java.util.List;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import static cn.autumn.wishbackstage.config.Configuration.DELETE_SQL;
 
 /**
  * @author cf
@@ -15,15 +20,52 @@ import java.util.List;
 @Service
 public final class DatabaseServiceImpl implements DatabaseService {
 
-    @Resource
-    private GenerateTableConfig generateTableConfig;
-
-    @Resource
-    private DatabaseMapper databaseMapper;
+    @Value("${spring.datasource.driver-class-name}")
+    private String driver;
+    @Value("${spring.datasource.url}")
+    private String url;
+    @Value("${spring.datasource.username}")
+    private String username;
+    @Value("${spring.datasource.password}")
+    private String password;
 
     @Override
-    public List<String> getTableList() {
-        return databaseMapper.getTableList(generateTableConfig.getDatabaseByUrl());
+    @SuppressWarnings("deprecation")
+    public String generateSql(UpTyCl u, String tp) {
+        StringBuilder sql = new StringBuilder("alter table " + u.getTableName() + tp + " column " + u.getFieldName());
+        if (tp.equals(DELETE_SQL)) return sql.toString();
+        if (!StringUtils.isEmpty(u.getFieldType())) {
+            sql.append(" ").append(u.getFieldType());
+        }
+        if (!StringUtils.isEmpty(u.getIsNull())) {
+            sql.append(" ").append(u.getIsNull());
+        }
+        if (!StringUtils.isEmpty(u.getComment())) {
+            sql.append(" comment '").append(u.getComment()).append("'");
+        }
+        return sql.toString();
     }
 
+    @Override
+    public void exec(String sql) {
+
+        try (Connection c = connection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.executeUpdate();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    /**
+     * private
+     */
+
+    private Connection connection() throws ClassNotFoundException, SQLException {
+        /* Exec driver */
+        Class.forName(driver);
+        /* Connection */
+        return DriverManager.getConnection(url, username, password);
+    }
 }

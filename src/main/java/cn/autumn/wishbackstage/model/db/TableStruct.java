@@ -7,6 +7,7 @@ import lombok.Setter;
  * @author cf
  * Created in 2022/11/2
  */
+@SuppressWarnings("all")
 public final class TableStruct {
     @Getter @Setter String COLUMN_NAME;
     @Getter @Setter String IS_NULLABLE;

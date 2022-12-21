@@ -54,4 +54,11 @@ public final class Configuration extends ConfigureContainer {
     public static final String UPDATE = "update";
     public static final String DELETE = "delete";
 
+    /**
+     * ADD sql or UPDATE sql
+     */
+    public static final String ADD_SQL = " add";
+    public static final String UPDATE_SQL = " modify";
+    public static final String DELETE_SQL = " drop";
+
 }

@@ -9,6 +9,7 @@ import java.util.List;
  * @author cf
  * Created in 2022/11/16
  */
+@SuppressWarnings("all")
 public final class UAD {
 
     @Getter @Setter private List<UpTyCl> update;

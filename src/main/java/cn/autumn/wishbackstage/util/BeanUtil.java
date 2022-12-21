@@ -33,6 +33,7 @@ public final class BeanUtil {
         for (File file : files) {
             if (file.getName().equals("entity")) {
                 System.out.println("sda");
+                // TODO: 2022/12/21 18:13 process
             }
             if (file.isDirectory()) {
                 getTargetClasses(classes, annotation, packaging + "." + file.getName());

@@ -21,6 +21,8 @@ public class User {
     @FieldAttribute(name = "nick_name", fieldType = "varchar(30)", isNull = false, comment = "昵称")
     @Getter @Setter private String nickName;
     @Getter @Setter private String signature;
-    @Getter @Setter private String headImage;
-
+//    @Getter @Setter private String headImage;
+    @Getter @Setter private String access;
+    @Getter @Setter private Integer number;
+    @Getter @Setter private Long length;
 }

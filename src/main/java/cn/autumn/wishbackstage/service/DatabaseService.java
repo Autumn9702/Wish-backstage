@@ -1,6 +1,6 @@
 package cn.autumn.wishbackstage.service;
 
-import java.util.List;
+import cn.autumn.wishbackstage.model.db.UpTyCl;
 
 /**
  * @author cf
@@ -9,8 +9,16 @@ import java.util.List;
 public interface DatabaseService {
 
     /**
-     * Get all table
-     * @return The table Name's
+     * Generate update sql
+     * @param u param
+     * @param tp type
+     * @return sql
      */
-    List<String> getTableList();
+    String generateSql(UpTyCl u, String tp);
+
+    /**
+     * Exec sql
+     * @param sql sql
+     */
+    void exec(String sql);
 }

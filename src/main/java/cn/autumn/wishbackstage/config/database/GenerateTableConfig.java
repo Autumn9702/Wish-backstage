@@ -3,10 +3,12 @@ package cn.autumn.wishbackstage.config.database;
 import cn.autumn.wishbackstage.ex.DatabaseException;
 import cn.autumn.wishbackstage.mapper.DatabaseMapper;
 import cn.autumn.wishbackstage.model.db.*;
+import cn.autumn.wishbackstage.service.DatabaseService;
 import cn.autumn.wishbackstage.util.BeanUtil;
 import cn.autumn.wishbackstage.util.Utils;
 import com.baomidou.mybatisplus.annotation.TableName;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -22,11 +24,11 @@ import static cn.autumn.wishbackstage.config.Configuration.*;
  * @author cf
  * Created in 2022/11/2
  */
-//@Configuration
+@Configuration
 public class GenerateTableConfig {
 
     @Value("${spring.datasource.url}")
-    private String databaseUrl;
+    private String url;
 
     @Value("${database-management.match-mode}")
     private String matchMode;
@@ -34,9 +36,11 @@ public class GenerateTableConfig {
     @Resource
     private DatabaseMapper databaseMapper;
 
+    @Resource
+    private DatabaseService databaseService;
 
-    public String getDatabaseByUrl() {
-        return databaseUrl.substring(databaseUrl.lastIndexOf("3306/") + 5, databaseUrl.lastIndexOf("?"));
+    public String getDatabase() {
+        return url.substring(url.lastIndexOf("3306/") + 5, url.lastIndexOf("?"));
     }
 
     @PostConstruct
@@ -44,7 +48,7 @@ public class GenerateTableConfig {
         if (matchMode == null) return;
         Set<Class<?>> entities = BeanUtil.getTargetClasses(TableName.class, "cn");
         if (entities.isEmpty()) return;
-        List<String> tableList = databaseMapper.getTableList(getDatabaseByUrl());
+        List<String> tableList = databaseMapper.getTableList(getDatabase());
         logicMatch(entities, tableList);
     }
 
@@ -146,7 +150,7 @@ public class GenerateTableConfig {
         for (Class<?> e : es) {
             String tableName = e.getAnnotation(TableName.class).value();
             List<TableStruct> entityStruct = classToTableStruct(e);
-            List<TableStruct> tableStruct = databaseMapper.getTableStruct(getDatabaseByUrl(), e.getAnnotation(TableName.class).value());
+            List<TableStruct> tableStruct = databaseMapper.getTableStruct(getDatabase(), e.getAnnotation(TableName.class).value());
             UAD uad = determinesFieldUpdated(tableName, entityStruct, tableStruct);
             if (uad != null) {
                 processUpdateDB(uad);
@@ -165,20 +169,14 @@ public class GenerateTableConfig {
             List<UpTyCl> updateFields = uad.getUpdate();
 
             for (UpTyCl utc : updateFields) {
-                switch (utc.getType()) {
-                    case FIELD_TYPE -> System.out.println("TYPE");
-                    case FIELD_NULL -> System.out.println("NULL");
-                    case FIELD_COMMENT -> System.out.println("COMMENT");
-                    default -> throw new DatabaseException("Parsing exception: " + utc.getType());
-                }
+                databaseService.exec(databaseService.generateSql(utc, UPDATE_SQL));
             }
         }
 
         if (uad.getCreate() != null) {
             List<UpTyCl> createFields = uad.getCreate();
-
             for (UpTyCl c : createFields) {
-                System.out.println("create");
+                databaseService.exec(databaseService.generateSql(c, ADD_SQL));
             }
         }
 
@@ -186,7 +184,7 @@ public class GenerateTableConfig {
             List<UpTyCl> deleteFields = uad.getDelete();
 
             for (UpTyCl d : deleteFields) {
-                System.out.println("delete");
+                databaseService.exec(databaseService.generateSql(d, DELETE_SQL));
             }
         }
 
@@ -214,6 +212,7 @@ public class GenerateTableConfig {
                     sameField = true;
                 }
             }
+            /* Entity has a new field. */
             if (!sameField) {
                 if (addField == null) {
                     addField = new ArrayList<>();
@@ -276,13 +275,14 @@ public class GenerateTableConfig {
         UpTyCl u = null;
         String fieldType = ef.getCHARACTER_MAXIMUM_LENGTH() == null ?
                 Utils.ofDefaultFieldLen(ef.getDATA_TYPE()) : ef.getDATA_TYPE() + "(" + ef.getCHARACTER_MAXIMUM_LENGTH() + ")";
+        /* If the field type and length change. */
         if (!ef.getDATA_TYPE().equals(df.getDATA_TYPE()) || !ef.getCHARACTER_MAXIMUM_LENGTH().equals(df.getCHARACTER_MAXIMUM_LENGTH())) {
             if (ef.getCHARACTER_MAXIMUM_LENGTH() != null && !ef.getCHARACTER_MAXIMUM_LENGTH().isEmpty()) {
                 ef.setDATA_TYPE(ef.getDATA_TYPE() + "(" + ef.getCHARACTER_MAXIMUM_LENGTH() + ")");
             }
             u = new UpTyCl(FIELD_TYPE, tableName, ef.getCOLUMN_NAME(), fieldType);
         }
-
+        /* Field changes to null by default. */
         if (!ef.getIS_NULLABLE().equals(df.getIS_NULLABLE())) {
             String isNull = ef.getIS_NULLABLE().equals(DB_FIELD_IS_NULL) ? PARAM_NULL : PARAM_NOT_NULL;
             if (u == null) {
@@ -291,7 +291,7 @@ public class GenerateTableConfig {
                 u.setIsNull(isNull);
             }
         }
-
+        /* Comment change. */
         if (!ef.getCOLUMN_COMMENT().equals(df.getCOLUMN_COMMENT())) {
             String isNull = ef.getIS_NULLABLE().equals(DB_FIELD_IS_NULL) ? PARAM_NULL : PARAM_NOT_NULL;
             if (u == null) {
@@ -359,6 +359,8 @@ public class GenerateTableConfig {
         return field.substring(field.lastIndexOf("(") + 1, field.lastIndexOf(")"));
     }
 
-
+    public List<String> getTableList() {
+        return databaseMapper.getTableList(getDatabase());
+    }
 
 }
