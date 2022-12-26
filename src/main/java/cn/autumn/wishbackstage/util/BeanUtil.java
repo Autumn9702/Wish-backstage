@@ -2,12 +2,9 @@ package cn.autumn.wishbackstage.util;
 
 import org.reflections.Reflections;
 
-import java.io.File;
 import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
-
-import static cn.autumn.wishbackstage.config.Configuration.RELATIVE_PATH;
 
 /**
  * @author cf
@@ -28,17 +25,17 @@ public final class BeanUtil {
 
     public static void getTargetClasses(Set<Class<?>> classes, Class<? extends Annotation> annotation, String packaging) {
         getTargetClass(classes, annotation, packaging);
-        File[] files = new File(RELATIVE_PATH + packaging.replace(".", "/")).listFiles();
-        assert files != null;
-        for (File file : files) {
-            if (file.getName().equals("entity")) {
-                System.out.println("sda");
-                // TODO: 2022/12/21 18:13 process
-            }
-            if (file.isDirectory()) {
-                getTargetClasses(classes, annotation, packaging + "." + file.getName());
-            }
-        }
+//        File[] files = new File(RELATIVE_PATH + packaging.replace(".", "/")).listFiles();
+//        assert files != null;
+//        for (File file : files) {
+//            if (file.isDirectory()) {
+//                getTargetClasses(classes, annotation, packaging + "." + file.getName());
+//            }
+//            if (!file.isFile()) continue;
+//            reflections = new Reflections(file.getPath());
+//
+//            System.out.println("sad");
+//        }
     }
 
 

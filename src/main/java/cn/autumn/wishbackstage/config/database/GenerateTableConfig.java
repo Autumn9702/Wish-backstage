@@ -1,5 +1,6 @@
 package cn.autumn.wishbackstage.config.database;
 
+import cn.autumn.wishbackstage.WishBackstageApplication;
 import cn.autumn.wishbackstage.ex.DatabaseException;
 import cn.autumn.wishbackstage.mapper.DatabaseMapper;
 import cn.autumn.wishbackstage.model.db.*;
@@ -81,10 +82,9 @@ public class GenerateTableConfig {
      * @param dbTables The database table's.
      */
     private void updateMode(Set<Class<?>> entities, List<String> dbTables) {
+        createMode(entities, dbTables);
         Set<Class<?>> same = update(entities, dbTables);
-        List<TableField> updateInfo = updateTableInfo(same);
-
-
+        updateTableInfo(same);
     }
 
     /**
@@ -92,7 +92,11 @@ public class GenerateTableConfig {
      * @param entities The code entity class.
      * @param dbTables The database table's.
      */
-    private void deleteMode(Set<Class<?>> entities, List<String> dbTables) {}
+    private void deleteMode(Set<Class<?>> entities, List<String> dbTables) {
+        createMode(entities, dbTables);
+        updateMode(entities, dbTables);
+        delete(entities, dbTables);
+    }
 
     /**
      * A table is added if the table does not exist.
@@ -111,7 +115,18 @@ public class GenerateTableConfig {
     /**
      * Delete table if entity does not exist.
      */
-    private void delete() {}
+    private void delete(Set<Class<?>> entities, List<String> dbTables) {
+        List<String> ent = new ArrayList<>();
+        entities.forEach(e -> ent.add(e.getAnnotation(TableName.class).value()));
+        List<String> del = dbTables.stream().filter(d -> !ent.contains(d)).toList();
+        if (del != null && !del.isEmpty()) {
+            try {
+                del.forEach(t -> databaseMapper.dropTable(t));
+            } catch (Exception e) {
+                WishBackstageApplication.getLogger().error(e.getMessage());
+            }
+        }
+    }
 
     /**
      * Build table information
@@ -146,7 +161,7 @@ public class GenerateTableConfig {
         return tfs;
     }
 
-    private List<TableField> updateTableInfo(Set<Class<?>> es) {
+    private void updateTableInfo(Set<Class<?>> es) {
         for (Class<?> e : es) {
             String tableName = e.getAnnotation(TableName.class).value();
             List<TableStruct> entityStruct = classToTableStruct(e);
@@ -156,7 +171,6 @@ public class GenerateTableConfig {
                 processUpdateDB(uad);
             }
         }
-        return null;
     }
 
     /**
@@ -195,8 +209,6 @@ public class GenerateTableConfig {
      */
     private UAD determinesFieldUpdated(String tableName, List<TableStruct> ent, List<TableStruct> dbt) {
 
-        if (ent.size() != dbt.size()) return null;
-
         List<UpTyCl> updateField = new ArrayList<>();
         List<UpTyCl> addField = null;
         List<UpTyCl> delField = null;
@@ -218,8 +230,8 @@ public class GenerateTableConfig {
                     addField = new ArrayList<>();
                 }
                 String isNull = ef.getIS_NULLABLE().equals(DB_FIELD_IS_NULL) ? PARAM_NULL : PARAM_NOT_NULL;
-                addField.add(new UpTyCl(FIELD_CREATE, tableName, ef.getCOLUMN_NAME(),ef.getDATA_TYPE(), isNull, ef.getCOLUMN_COMMENT()));
-            };
+                addField.add(new UpTyCl(FIELD_CREATE, tableName, ef.getCOLUMN_NAME(), ef.getDATA_TYPE() + "(" + ef.getCHARACTER_MAXIMUM_LENGTH() + ")", isNull, ef.getCOLUMN_COMMENT()));
+            }
         }
 
         if (addField != null) {
@@ -276,7 +288,8 @@ public class GenerateTableConfig {
         String fieldType = ef.getCHARACTER_MAXIMUM_LENGTH() == null ?
                 Utils.ofDefaultFieldLen(ef.getDATA_TYPE()) : ef.getDATA_TYPE() + "(" + ef.getCHARACTER_MAXIMUM_LENGTH() + ")";
         /* If the field type and length change. */
-        if (!ef.getDATA_TYPE().equals(df.getDATA_TYPE()) || !ef.getCHARACTER_MAXIMUM_LENGTH().equals(df.getCHARACTER_MAXIMUM_LENGTH())) {
+        if (!ef.getDATA_TYPE().equals(df.getDATA_TYPE()) || ef.getCHARACTER_MAXIMUM_LENGTH() != null &&
+                df.getCHARACTER_MAXIMUM_LENGTH() != null && !ef.getCHARACTER_MAXIMUM_LENGTH().equals(df.getCHARACTER_MAXIMUM_LENGTH())) {
             if (ef.getCHARACTER_MAXIMUM_LENGTH() != null && !ef.getCHARACTER_MAXIMUM_LENGTH().isEmpty()) {
                 ef.setDATA_TYPE(ef.getDATA_TYPE() + "(" + ef.getCHARACTER_MAXIMUM_LENGTH() + ")");
             }

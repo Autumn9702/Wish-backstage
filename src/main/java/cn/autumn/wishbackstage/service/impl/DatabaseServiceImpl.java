@@ -1,5 +1,6 @@
 package cn.autumn.wishbackstage.service.impl;
 
+import cn.autumn.wishbackstage.WishBackstageApplication;
 import cn.autumn.wishbackstage.model.db.UpTyCl;
 import cn.autumn.wishbackstage.service.DatabaseService;
 import org.springframework.beans.factory.annotation.Value;
@@ -53,7 +54,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.executeUpdate();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            WishBackstageApplication.getLogger().error(e.getMessage());
         }
 
     }
