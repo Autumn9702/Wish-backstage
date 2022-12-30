@@ -5,12 +5,23 @@ spring:
   application:
     name: Wish Backstage
     version: 0.0.1v
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    pool:
+      max-active: 8
+      max-wait: -1
+      max-idle: 8
+      min-idle: 0
+    timeout: 0
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     name: defaultDataSource
     url: jdbc:mysql://127.0.0.1:3306/wish?serverTimezone=UTC
     username: root
     password: mysql@zxsmart
+
 
 mybatis-plus:
   configuration:
@@ -24,3 +35,6 @@ mybatis-plus:
 
 database-management:
   match-mode: delete
+
+crypto:
+  secret: AKIWISH1230 #MD5(secret + uuid)

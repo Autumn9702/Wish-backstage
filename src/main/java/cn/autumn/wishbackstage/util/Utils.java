@@ -120,7 +120,7 @@ public final class Utils {
     @SuppressWarnings("all")
     public static void verifyField(String s) {
         switch (s) {
-            case "int", "bigint", "varchar","float", "double", "tinyint" -> { return; }
+            case "int", "bigint", "varchar", "float", "double", "tinyint", "json" -> { return; }
             default -> {
                 if (s.matches(REGEX_INT) ||
                     s.matches(REGEX_LONG) ||
