@@ -37,4 +37,7 @@ database-management:
   match-mode: delete
 
 crypto:
-  secret: AKIWISH1230 #MD5(secret + uuid)
+  header: Authorization
+  expires: 7200000  # two hours
+  secret: CHENGZINOWISHPROJECT20221026START
+  cookie: AKI-AUTUMN
