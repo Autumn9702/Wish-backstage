@@ -4,7 +4,7 @@ server:
 spring:
   application:
     name: Wish Backstage
-    version: 0.0.1v
+    version: 0.0.4v
   redis:
     database: 0
     host: 127.0.0.1
@@ -38,6 +38,5 @@ database-management:
 
 crypto:
   header: Authorization
-  expires: 7200000  # two hours
   secret: CHENGZINOWISHPROJECT20221026START
   cookie: AKI-AUTUMN

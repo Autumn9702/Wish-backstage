@@ -1,12 +1,12 @@
 package cn.autumn.wishbackstage.config.safety;
 
 import cn.autumn.wishbackstage.WishBackstageApplication;
+import cn.autumn.wishbackstage.service.RedisCacheService;
 import cn.autumn.wishbackstage.util.JsonUtil;
 import com.google.gson.JsonObject;
 import io.lettuce.core.RedisException;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.MethodParameter;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -30,7 +30,7 @@ import java.util.List;
 public class RequestDecrypt extends RequestBodyAdviceAdapter {
 
     @Resource
-    private StringRedisTemplate stringRedisTemplate;
+    private RedisCacheService redisCacheService;
 
     @Override
     public boolean supports(MethodParameter methodParameter, Type targetType, Class<? extends HttpMessageConverter<?>> converterType) {
@@ -78,7 +78,7 @@ public class RequestDecrypt extends RequestBodyAdviceAdapter {
      * @return Decrypted data
      */
     private String decryptToString(String encrypts, String encryptKey, String publicKeyId) {
-        String privateKey = stringRedisTemplate.opsForValue().get(publicKeyId);
+        String privateKey = redisCacheService.srGet(publicKeyId);
         if (StringUtils.isEmpty(privateKey)) {
             WishBackstageApplication.getLogger().error("Private key expire.");
             throw new RedisException("RSA encrypt private key expire.");

@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import java.util.Date;
 import java.util.Map;
 
+import static cn.autumn.wishbackstage.config.Configuration.ONLINE_TIME;
+
 /**
  * @author Autumn
  * Created in 2022/12/30
@@ -15,9 +17,6 @@ import java.util.Map;
 public final class JwtUtil {
     @Value("${crypto.secret}")
     private String secret;
-
-    @Value("${crypto.expires}")
-    private long expires;
 
     @Value("${crypto.header}")
     private String header;
@@ -59,6 +58,6 @@ public final class JwtUtil {
     }
 
     public Date getExpireDate() {
-        return new Date(System.currentTimeMillis() + this.expires);
+        return new Date(System.currentTimeMillis() + ONLINE_TIME );
     }
 }

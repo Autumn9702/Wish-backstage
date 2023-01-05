@@ -2,9 +2,9 @@ package cn.autumn.wishbackstage.config.safety;
 
 import cn.autumn.wishbackstage.WishBackstageApplication;
 import cn.autumn.wishbackstage.ex.CryptoException;
+import cn.autumn.wishbackstage.service.RedisCacheService;
 import cn.autumn.wishbackstage.util.JsonUtil;
 import org.springframework.core.MethodParameter;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
@@ -25,7 +25,7 @@ import java.util.List;
 public class ResponseCrypto implements ResponseBodyAdvice {
 
     @Resource
-    private StringRedisTemplate stringRedisTemplate;
+    private RedisCacheService redisCacheService;
 
     @Override
     public boolean supports(MethodParameter returnType, Class converterType) {
@@ -40,7 +40,7 @@ public class ResponseCrypto implements ResponseBodyAdvice {
         if (encryptKeyHeadList == null || publicKeyIdHeadList == null) return body;
         String encryptKeyHead = encryptKeyHeadList.get(0);
         String publicKeyHead = publicKeyIdHeadList.get(0);
-        String privateKey = stringRedisTemplate.opsForValue().get(publicKeyHead);
+        String privateKey = redisCacheService.srGet(publicKeyHead);
         if (StringUtils.isEmpty(privateKey)) {
             WishBackstageApplication.getLogger().error("Private key not exist or expire.");
             throw new CryptoException("RSA private key expire.");

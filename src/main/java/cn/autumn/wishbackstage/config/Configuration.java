@@ -61,4 +61,31 @@ public final class Configuration extends ConfigureContainer {
     public static final String UPDATE_SQL = " modify";
     public static final String DELETE_SQL = " drop";
 
+    /**
+     * Request address
+     */
+    public static final String WISH_PATH = "/wish";
+    public static final String API_PATH = "/api";
+    public static final String LOGIN_PATH = "/login";
+
+    /**
+     * Symbol
+     */
+    public static final String SLASH = "/";
+
+    /**
+     * Redis key
+     */
+    public static final String ACCOUNT_ONLINE = "online_";
+    public static final String ACCOUNT_ONLINE_RSH = "online_refresh_";
+
+    /**
+     * Number
+     */
+    public static final int THOUSAND = 1000;
+
+    public static final int ONLINE_TIME = 3600;
+    public static final int ONLINE_TIME_MILLIS = ONLINE_TIME * THOUSAND;
+    public static final int ONLINE_TIME_RSH = 5400;
+
 }

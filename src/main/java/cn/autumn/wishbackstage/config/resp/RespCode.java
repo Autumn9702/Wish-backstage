@@ -12,6 +12,10 @@ public enum RespCode {
     S(0, "ok"),
     ERR(-1, "处理异常"),
 
+    TK_NULL(10010, "凭证缺失"),
+    TK_EXPIRE(10011, "凭证超时"),
+    TK_PERJURY(10015, "伪证"),
+    TK_RE_LOGIN(10012, "请重新登录"),
     ;
 
 
