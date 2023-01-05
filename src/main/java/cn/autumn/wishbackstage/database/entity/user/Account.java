@@ -1,13 +1,13 @@
 package cn.autumn.wishbackstage.database.entity.user;
 
 
+import cn.autumn.wishbackstage.database.entity.Entity;
 import cn.autumn.wishbackstage.util.Crypto;
 import cn.autumn.wishbackstage.util.Utils;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Id;
 import java.util.List;
 
 
@@ -16,16 +16,13 @@ import java.util.List;
  * Created in 2022/10/31
  */
 @TableName(value = "account")
-public class Account {
-
-    @Getter @Setter @Id
-    private int id;
+public class Account extends Entity {
 
     @Getter @Setter private String username;
     @Getter @Setter private String password;
 
-    @Setter private String email;
-    @Setter private String phone;
+    @Setter @Getter private String email;
+    @Setter @Getter private String phone;
 
     @Getter @Setter private String token;
     /* backstage web */

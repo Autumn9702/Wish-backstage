@@ -15,6 +15,9 @@ public final class Configuration extends ConfigureContainer {
     public static final String REGEX_FLOAT = "float\\(\\d+\\)";
     public static final String REGEX_DOUBLE = "double\\(\\d+\\)";
 
+    public static final String RGX_EMAIL = "^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(.[a-zA-Z0-9_-]+)+$";
+    public static final String RGX_PHONE = "^1(3|4|5|7|8|9)\\d{9}$";
+
     public static final String CAPITAL_LETTERS = "[A-Z]";
 
     public static final String RELATIVE_PATH = "./src/main/java/";
@@ -22,6 +25,9 @@ public final class Configuration extends ConfigureContainer {
     public static final String FIELD_NAME_ID = "id";
     public static final String ID_ATTRIBUTE = "NOT NULL AUTO_INCREMENT";
 
+    /**
+     * DB
+     */
     public static final char UNDERLINE = '_';
     public static final String LOWER_NULL = "null";
     public static final String PARAM_NULL = "NULL";
