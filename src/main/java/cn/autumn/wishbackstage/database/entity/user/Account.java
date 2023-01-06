@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
 import java.util.List;
 
 
@@ -18,10 +19,13 @@ import java.util.List;
 @TableName(value = "account")
 public class Account extends Entity {
 
+    @Serial
+    private static final long serialVersionUID = 7244082835835666821L;
+
     @Getter @Setter private String username;
     @Getter @Setter private String password;
 
-    @Setter @Getter private String email;
+    @Setter private String email;
     @Setter @Getter private String phone;
 
     @Getter @Setter private String token;

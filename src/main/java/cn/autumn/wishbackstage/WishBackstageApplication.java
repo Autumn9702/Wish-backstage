@@ -1,6 +1,7 @@
 package cn.autumn.wishbackstage;
 
 import ch.qos.logback.classic.Logger;
+import cn.autumn.wishbackstage.config.ConfigureContainer;
 import org.mybatis.spring.annotation.MapperScan;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -15,6 +16,8 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 public class WishBackstageApplication {
 
     private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(WishBackstageApplication.class);
+
+    public static ConfigureContainer container;
 
     public static Logger getLogger() {
         return LOGGER;

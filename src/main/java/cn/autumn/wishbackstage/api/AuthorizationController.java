@@ -2,8 +2,14 @@ package cn.autumn.wishbackstage.api;
 
 import cn.autumn.wishbackstage.api.dto.account.LoginDto;
 import cn.autumn.wishbackstage.config.resp.Resp;
+import cn.autumn.wishbackstage.service.AccountService;
 import cn.autumn.wishbackstage.util.RespUtil;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.annotation.Resource;
 
 /**
  * @author Autumn
@@ -12,6 +18,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = "/wish/login")
 public class AuthorizationController {
+
+    @Resource
+    private AccountService accountService;
 
     @PostMapping("")
     public Resp<Object> login(@RequestBody LoginDto loginDto) {

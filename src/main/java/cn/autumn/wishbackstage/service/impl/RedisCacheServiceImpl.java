@@ -33,6 +33,11 @@ public class RedisCacheServiceImpl implements RedisCacheService {
     }
 
     @Override
+    public void srSet(String k, String v) {
+        stringRedisTemplate.opsForValue().set(k, v);
+    }
+
+    @Override
     public void srSet(String k, String v, long timeout, TimeUnit unit) {
         stringRedisTemplate.opsForValue().set(k, v, timeout, unit);
     }
@@ -45,6 +50,11 @@ public class RedisCacheServiceImpl implements RedisCacheService {
     @Override
     public String srGet(String k) {
         return stringRedisTemplate.opsForValue().get(k);
+    }
+
+    @Override
+    public void delete(String k) {
+        redisTemplate.delete(k);
     }
 
 }

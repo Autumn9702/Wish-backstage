@@ -1,10 +1,19 @@
 package cn.autumn.wishbackstage.config;
 
+import static cn.autumn.wishbackstage.WishBackstageApplication.container;
+
 /**
  * @author cf
  * Created in 2022/11/3
  */
 public final class Configuration extends ConfigureContainer {
+
+    public static ConfigureContainer c = container;
+
+    public static final RedisKey REDIS_KEY = container.redisKey;
+    public static final HttpIpParam HTTP_IP_PARAM = container.httpIpParam;
+    public static final FormatMatch FORMAT_MATCH = container.formatMatch;
+    public static final DateFormat DATE_FORMAT = container.dateFormat;
 
     /**
      * Regex
@@ -14,9 +23,6 @@ public final class Configuration extends ConfigureContainer {
     public static final String REGEX_STRING = "varchar\\(\\d+\\)";
     public static final String REGEX_FLOAT = "float\\(\\d+\\)";
     public static final String REGEX_DOUBLE = "double\\(\\d+\\)";
-
-    public static final String RGX_EMAIL = "^[A-Za-z0-9\u4e00-\u9fa5]+@[a-zA-Z0-9_-]+(.[a-zA-Z0-9_-]+)+$";
-    public static final String RGX_PHONE = "^1(3|4|5|7|8|9)\\d{9}$";
 
     public static final String CAPITAL_LETTERS = "[A-Z]";
 
@@ -94,4 +100,9 @@ public final class Configuration extends ConfigureContainer {
     public static final int ONLINE_TIME_MILLIS = ONLINE_TIME * THOUSAND;
     public static final int ONLINE_TIME_RSH = 5400;
 
+    /**
+     * Other
+     */
+    public static final String LOCALHOST = "127.0.0.1";
+    public static final String USER_TYPE = "web";
 }

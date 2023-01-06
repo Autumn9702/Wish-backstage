@@ -26,6 +26,13 @@ public interface RedisCacheService {
     void set(String k, Object v);
 
     /**
+     * Store in redis >/value is string type (Forever)
+     * @param k Key
+     * @param v Value
+     */
+    void srSet(String k, String v);
+
+    /**
      * Store in redis >/value is string type (Time limit)
      * @param k Key
      * @param v Value
@@ -47,4 +54,10 @@ public interface RedisCacheService {
      * @return Value (String)
      */
     String srGet(String k);
+
+    /**
+     * Delete value by key
+     * @param k Key
+     */
+    void delete(String k);
 }

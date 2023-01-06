@@ -27,6 +27,10 @@ public class RedisCacheServe {
         redisCacheService.srSet(ACCOUNT_ONLINE_RSH + k, k, ONLINE_TIME_RSH, TimeUnit.SECONDS);
     }
 
+    public void srSetValue(String k, String v) {
+        redisCacheService.srSet(k, v);
+    }
+
     public String getOnlineUser(String k) {
         return redisCacheService.srGet(ACCOUNT_ONLINE + k);
     }
@@ -34,4 +38,13 @@ public class RedisCacheServe {
     public String getOnlineRefresh(String k) {
         return redisCacheService.srGet(ACCOUNT_ONLINE_RSH + k);
     }
+
+    public String getValue(String k) {
+        return redisCacheService.srGet(k);
+    }
+
+    public void delete(String k){
+        redisCacheService.delete(k);
+    }
+
 }

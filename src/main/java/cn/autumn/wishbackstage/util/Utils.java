@@ -2,12 +2,19 @@ package cn.autumn.wishbackstage.util;
 
 import cn.autumn.wishbackstage.WishBackstageApplication;
 import cn.autumn.wishbackstage.ex.DatabaseException;
+import com.google.gson.reflect.TypeToken;
 import org.springframework.lang.Nullable;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.lang.reflect.Field;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -156,6 +163,36 @@ public final class Utils {
             b.deleteCharAt(0);
         }
         return b.toString();
+    }
+
+    @SuppressWarnings("all")
+    public static String getIp() {
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
+        String ip = null;
+        Map<String, Object> m = JsonUtil.getGson().fromJson(JsonUtil.getGson().toJson(HTTP_IP_PARAM),
+                TypeToken.getParameterized(Map.class, String.class, Object.class).getType());
+        for (Map.Entry<String, Object> e : m.entrySet()) {
+            ip = request.getHeader(e.getValue().toString());
+            if (ip != null && ip.length() != 0 && !HTTP_IP_PARAM.unknown.equalsIgnoreCase(ip)) break;
+        }
+        if (ip == null || ip.length() == 0 || HTTP_IP_PARAM.unknown.equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+            if (ip.equals(LOCALHOST)) {
+                InetAddress inetAddress = null;
+                try {
+                    inetAddress = InetAddress.getLocalHost();
+                } catch (UnknownHostException uhe) {
+                    uhe.printStackTrace();
+                }
+                ip = inetAddress.getHostAddress();
+            }
+        }
+        if (ip != null && ip.length() > 15) {
+            if (ip.indexOf(",") > 0) {
+                ip = ip.substring(0, ip.indexOf(","));
+            }
+        }
+        return ip;
     }
 
 }

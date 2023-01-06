@@ -16,6 +16,10 @@ public enum RespCode {
     TK_EXPIRE(10011, "凭证超时"),
     TK_PERJURY(10015, "伪证"),
     TK_RE_LOGIN(10012, "请重新登录"),
+
+    LG_VERIFY_CODE_ERROR(10050, "验证码错误"),
+    LG_ACCOUNT_ERR(10100, "账号不存在"),
+    LG_PASSWORD_ERR(10101, "密码错误"),
     ;
 
 
